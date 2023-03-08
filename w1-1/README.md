@@ -1,6 +1,6 @@
 ## w1-1作业(2023-03-07)
 1. 安装Metamask,并创建好账号
-![](./images/metamask.png)
+> ![](./images/metamask.png)
 
 ---
 2. 执行一次转账

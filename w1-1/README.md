@@ -8,4 +8,5 @@
 
 ---
 3. 使用Remix创建一个Counter合约并部署, Counter合约有一个add(x)方法
+> 合约代码: [点击查看](./Counter.sol)
 > 合约地址: [0x4E246568506a159140BE4AA4ccCa5Bec73b24307](https://goerli.etherscan.io/address/0x4E246568506a159140BE4AA4ccCa5Bec73b24307#code)

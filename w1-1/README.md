@@ -1,4 +1,7 @@
 ## w1-1作业(2023-03-07)
+
+> [w1-1作业](./images/w1-1-assignment.jpg)
+
 1. 安装Metamask,并创建好账号
 > ![](./images/metamask.png)
 

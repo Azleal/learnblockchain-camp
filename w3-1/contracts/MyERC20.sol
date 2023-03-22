@@ -6,23 +6,31 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 contract  MyERC20 is IERC20 {
 
     mapping(address => uint256) balances;
-    uint256 supply;
-    uint256 decimal;
+    uint256 _totalSupply;
+    uint256 public decimal;
+    string public symbol;
 
 
-    constructor () {
 
+    constructor (string memory _symbol, uint256 _decimal, uint256 _totalSupply) {
+      symbol = _symbol;
+      decimal = _decimal;
+      _totalSupply = _totalSupply;
     }
 
     /**
      * @dev Returns the amount of tokens in existence.
      */
-    function totalSupply() external view returns (uint256);
+    function totalSupply() external view returns (uint256){
+      return _totalSupply;
+    }
 
     /**
      * @dev Returns the amount of tokens owned by `account`.
      */
-    function balanceOf(address account) external view returns (uint256);
+    function balanceOf(address account) external view returns (uint256){
+      
+    }
 
     /**
      * @dev Moves `amount` tokens from the caller's account to `to`.

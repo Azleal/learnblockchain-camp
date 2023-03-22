@@ -1,6 +1,7 @@
 ## w3-1作业(2023-03-21)
 
-> [w2-2作业](./images/w3-1-assignment.png)
+> [w2-2作业1](./images/w3-1-1-assignment.png)
+> [w2-2作业2](./images/w3-1-1-assignment.png)
 
 1. [合约代码](./contracts/)
 

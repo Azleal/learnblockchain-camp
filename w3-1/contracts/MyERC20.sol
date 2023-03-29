@@ -2,22 +2,33 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract MyERC20 is IERC20, Ownable {
+contract MyERC20 is IERC20, Ownable, IERC20Permit {
     // owner => (spender => amount)
     mapping(address => mapping(address => uint256)) private _allowances;
     mapping(address => uint256) private _balances;
     uint256 private _totalSupply;
-    uint256 constant private _decimal = 18;
+    uint256 private constant _decimal = 18;
     string private _symbol;
     string private _name;
     // eth买入的比率
     uint256 public ETH_BUY_IN_RATIO = 100;
 
+    mapping(address => uint256) _nonces; 
+
+    bytes32 private constant _PERMIT_TYPEHASH =
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+    
+
+
     constructor(string memory name_, string memory symbol_) Ownable() {
         _symbol = symbol_;
         _name = name_;
+        //permit
+        
+
     }
 
     /**
@@ -35,8 +46,8 @@ contract MyERC20 is IERC20, Ownable {
     }
 
     function transfer(address to, uint256 amount) external returns (bool) {
-      _transfer(msg.sender, to, amount);
-      return true;
+        _transfer(msg.sender, to, amount);
+        return true;
     }
 
     function allowance(
@@ -58,11 +69,11 @@ contract MyERC20 is IERC20, Ownable {
         address from,
         address to,
         uint256 amount
-    ) external returns (bool){
+    ) external returns (bool) {
         //检查allowance
         uint256 _allowance = _allowances[from][msg.sender];
-        if(_allowance < amount){
-          revert InsufficientAllowanceCredit();
+        if (_allowance < amount) {
+            revert InsufficientAllowanceCredit();
         }
         _allowances[from][msg.sender] -= amount;
         _transfer(from, to, amount);
@@ -71,10 +82,10 @@ contract MyERC20 is IERC20, Ownable {
 
     error InsufficientBalance();
 
-    function _transfer(address from, address to, uint256 amount) private{
+    function _transfer(address from, address to, uint256 amount) private {
         uint256 fromBalance = _balances[from];
-        if(fromBalance < amount){
-          revert InsufficientBalance();
+        if (fromBalance < amount) {
+            revert InsufficientBalance();
         }
         _balances[from] -= amount;
         _balances[to] += amount;
@@ -82,9 +93,9 @@ contract MyERC20 is IERC20, Ownable {
     }
 
     function _mint(address account, uint256 amount) private {
-      _totalSupply += amount;
-      _balances[account] += amount;
-      emit Transfer(address(0), account, amount);
+        _totalSupply += amount;
+        _balances[account] += amount;
+        emit Transfer(address(0), account, amount);
     }
 
     //////////////////////////
@@ -93,12 +104,12 @@ contract MyERC20 is IERC20, Ownable {
     error InsufficientValueProvided();
 
     function buy() external payable {
-      uint256 value = msg.value;
-      if(value <= 0){
-        revert InsufficientValueProvided();
-      }
-      uint256 amount = ETH_BUY_IN_RATIO * value;
-      _mint(msg.sender, amount);
+        uint256 value = msg.value;
+        if (value <= 0) {
+            revert InsufficientValueProvided();
+        }
+        uint256 amount = ETH_BUY_IN_RATIO * value;
+        _mint(msg.sender, amount);
     }
 
     function setBuyInRatio(uint256 ratio_) external onlyOwner {
@@ -106,16 +117,36 @@ contract MyERC20 is IERC20, Ownable {
     }
 
     error WithdrawError();
-    function withdraw() external onlyOwner {
-      uint256 ethBalance = address(this).balance - 1;
-      (bool success,) = msg.sender.call{value: ethBalance}("");
-      if(!success){
-        revert WithdrawError();
-      }
-    } 
-    fallback(bytes calldata data) external payable returns (bytes memory){}
 
-    receive() external payable{}
+    function withdraw() external onlyOwner {
+        uint256 ethBalance = address(this).balance - 1;
+        (bool success, ) = msg.sender.call{value: ethBalance}("");
+        if (!success) {
+            revert WithdrawError();
+        }
+    }
+
+    fallback(bytes calldata data) external payable returns (bytes memory) {}
+
+    receive() external payable {}
+
+    function permit(
+        address owner,
+        address spender,
+        uint256 value,
+        uint256 deadline,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external override {}
+
+    function nonces(address owner) external view override returns (uint256) {
+        return _nonces[owner];
+    }
+
+    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
+      return keccak256(abi.encode(typeHash, nameHash, versionHash, block.chainid, address(this)));
+    }
 }
 
 

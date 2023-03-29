@@ -3,17 +3,17 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
-import "@openzeppelin/contracts/utils/introspection/ERC165.sol"
+import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contract/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "./MyERC20.sol";
 
 
 contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata{
   
-  using Counters for Counters.counter;
+  using Counters for Counters.Counter;
   
-  Counters.counter private _id;
+  Counters.Counter private _id;
 
   string private _name;
   string private _symbol;
@@ -36,10 +36,17 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
   uint256 public PRICE_IN_ETH = 0.01 ether;
 
 
-  constructor(string memory name_, string memory symbol_, address token_ ) Ownable() {
+  constructor(string memory name_, string memory symbol_, address payable token_ ) Ownable() {
       _name = name_;
       _symbol = symbol_;
       _token = MyERC20(token_);
+  }
+
+  function name() external view returns (string memory){
+    return _name;
+  }
+  function symbol() external view returns (string memory){
+    return _symbol;
   }
 
     function balanceOf(address owner) external view returns (uint256){
@@ -60,9 +67,9 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
       require(from != address(0), "from cannot be zero address");
       require(to != address(0), "to cannot be zero address");
       require(_ownerOf(tokenId) == from, "from is not owner of tokenId");
-      if( ){
+      // if( ){
 
-      }
+      // }
     }
 
 
@@ -79,8 +86,8 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
         address to,
         uint256 tokenId
     ) external{
-      require();
-      _transfer
+      // require();
+
     }
 
     function approve(address to, uint256 tokenId) external{
@@ -107,7 +114,7 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
         require(tokenId < _id.current(), "token is not minted yet"  );
         string memory baseURI = _BASE_URI;
         string memory tokenIdUri = _tokenUri[tokenId];
-        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : "";
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId)) : "";
     }
 
 ///////private
@@ -121,11 +128,11 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
       _balances[to] += 1;
 
       _owners[tokenId] = to;
-      emit Transfer(from, to, tokenId, 1);
+      emit Transfer(from, to, tokenId);
     }
 
-    function _ownerOf(uint256 tokenId) private returns(address){
-      require(tokenId < _id, "tokenId不存在");
+    function _ownerOf(uint256 tokenId) private view returns(address){
+      require(tokenId < _id.current(), "tokenId is not minted");
       return _owners[tokenId];
     }
 
@@ -144,7 +151,7 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
   }
 
   function mintWithToken() external {
-      uint256 priceInToken = PRICE_IN_ETH * _token.ETH_BUY_IN_RATIO;
+      uint256 priceInToken = PRICE_IN_ETH * _token.ETH_BUY_IN_RATIO();
       bool success = _token.transferFrom(msg.sender, address(this), priceInToken);
       require(success, "token transfer failed");
       _mint(msg.sender);

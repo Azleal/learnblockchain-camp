@@ -78,7 +78,7 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
         address to,
         uint256 tokenId
     ) external{
-
+      
     }
 
     function transferFrom(
@@ -114,7 +114,7 @@ contract UpchainCampIIMembershipNFT is IERC721, Ownable, ERC165, IERC721Metadata
         require(tokenId < _id.current(), "token is not minted yet"  );
         string memory baseURI = _BASE_URI;
         string memory tokenIdUri = _tokenUri[tokenId];
-        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId)) : "";
+        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenIdUri)) : "";
     }
 
 ///////private

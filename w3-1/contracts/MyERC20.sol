@@ -20,7 +20,7 @@ contract MyERC20 is IERC20, Ownable, IERC20Permit {
 
     mapping(address => uint256) _nonces; 
 
-    string  VERSION;
+    string VERSION;
 
     bytes32 private constant _PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
@@ -153,7 +153,7 @@ contract MyERC20 is IERC20, Ownable, IERC20Permit {
         bytes32 r,
         bytes32 s
     ) external override {
-        require(deadline <= block.timestamp, "permit expired deadline");
+        require(deadline >= block.timestamp, "permit expired deadline");
         require(spender != address(0), "spender should not be zero address");
         uint256 _nounce = useNounce(owner);
 

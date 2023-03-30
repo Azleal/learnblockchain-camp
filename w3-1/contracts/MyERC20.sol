@@ -4,6 +4,8 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract MyERC20 is IERC20, Ownable, IERC20Permit {
     // owner => (spender => amount)
@@ -18,17 +20,25 @@ contract MyERC20 is IERC20, Ownable, IERC20Permit {
 
     mapping(address => uint256) _nonces; 
 
+    string  VERSION;
+
     bytes32 private constant _PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+
+
+    bytes32 private _DOMAIN_SEPARATOR;
     
-
-
-    constructor(string memory name_, string memory symbol_) Ownable() {
+    constructor(string memory name_, string memory symbol_, string memory _versionNumber) Ownable() {
         _symbol = symbol_;
         _name = name_;
+        VERSION = _versionNumber;
         //permit
-        
-
+        bytes32 typeHash = keccak256(
+            "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        );
+        bytes32 hashedName = keccak256(bytes(name_));
+        bytes32 hashedVersion = keccak256(bytes(_versionNumber));
+        _DOMAIN_SEPARATOR = keccak256(abi.encode(typeHash, hashedName, hashedVersion, block.chainid, address(this)));
     }
 
     /**
@@ -58,8 +68,7 @@ contract MyERC20 is IERC20, Ownable, IERC20Permit {
     }
 
     function approve(address spender, uint256 amount) external returns (bool) {
-        _allowances[msg.sender][spender] = amount;
-        emit Approval(msg.sender, spender, amount);
+        _approve(msg.sender, spender, amount);
         return true;
     }
 
@@ -96,6 +105,11 @@ contract MyERC20 is IERC20, Ownable, IERC20Permit {
         _totalSupply += amount;
         _balances[account] += amount;
         emit Transfer(address(0), account, amount);
+    }
+
+    function _approve(address owner, address spender, uint256 amount) private{
+        _allowances[owner][spender] = amount;
+        emit Approval(owner, spender, amount);
     }
 
     //////////////////////////
@@ -138,17 +152,35 @@ contract MyERC20 is IERC20, Ownable, IERC20Permit {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external override {}
+    ) external override {
+        require(deadline <= block.timestamp, "permit expired deadline");
+        require(spender != address(0), "spender should not be zero address");
+        uint256 _nounce = useNounce(owner);
+
+        bytes32 structHash = keccak256(abi.encode(_PERMIT_TYPEHASH, owner, spender, value, _nounce, deadline));
+        bytes32 hash = keccak256(abi.encodePacked("\x19\x01",
+        _DOMAIN_SEPARATOR,
+        structHash));
+
+        address signer = ECDSA.recover(hash, v,r,s );
+        require(signer == owner, "invalid signature");
+        
+        _approve(owner, spender, value);
+
+    }
 
     function nonces(address owner) external view override returns (uint256) {
         return _nonces[owner];
     }
 
+    function useNounce(address owner) private returns (uint256){
+        return _nonces[owner]++;
+    }
+
     function DOMAIN_SEPARATOR() external view override returns (bytes32) {
-      return keccak256(abi.encode(typeHash, nameHash, versionHash, block.chainid, address(this)));
+      return _DOMAIN_SEPARATOR;
     }
 }
-
 
 contract Vault{
   

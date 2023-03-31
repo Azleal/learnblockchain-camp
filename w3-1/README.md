@@ -4,20 +4,21 @@
 > [w2-2作业1](./images/w3-1-1-assignment.png)
 > [w2-2作业2](./images/w3-1-1-assignment.png)
 
-1. [合约代码](./contracts/)
+1. [ERC2612合约代码](./contracts/MyERC20.sol)
+1. [ERC721合约代码]() //TO DEPLOY
 
 2. 部署合约
-  - [Score合约](https://mumbai.polygonscan.com/address/xxx#code)
-  - [Teacher合约](https://mumbai.polygonscan.com/address/xxx#code)
+  - [ERC2612合约](https://mumbai.polygonscan.com/address/0x6C9eDADb9F7F9a6BF196C27dbfCb6b0d6a14D039#code)
+  - [Vault合约](https://mumbai.polygonscan.com/address/0x7E96f5bb1dF091922F010D36293706777715e104#code)
 
 
 #### 配置及运行说明
 1. 复制[.env-example](./..env-example)为`.env`并修改其中参数
 2. 安装依赖`npm install`
 3. 编译合约`npx hardhat compile`
-4. 测试合约`npx hardhat test test/xxx.t.js`
+4. 测试合约`npx hardhat test test/MyERC20.t.js`
 5. 部署合约至测试网`npx hardhat run scripts/deploy.js --network mumbai`得到部署地址`address`
-6. 将代码开源`npx hardhat verify --network mumbai xxx`
+6. 将代码开源`npx hardhat verify --network mumbai 0x6C9eDADb9F7F9a6BF196C27dbfCb6b0d6a14D039 Azleal AZLEAL 1`
 
 ### 课程总结
 
@@ -43,7 +44,6 @@
 > 3. 操作限制较多: ERC20标准规定了代币合约的操作限制, 例如不能超过总发行量、不能转账到合约地址等, 这使得ERC20代币的使用受到一定的限制.
 > 4. 安全性问题: 由于ERC20标准允许代币合约的定制, 一些代币合约可能存在安全漏洞和风险, 例如重入攻击, 溢出漏洞等.
 > 5. 无法支持非同质化代币: ERC20标准无法支持非同质化代币(NFT), 这些代币需要使用其他的标准或者自定义合约进行实现.
-
 
 
 #### ERC-2612
